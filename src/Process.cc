@@ -16,14 +16,14 @@ void Process::process(const Vocabulary& vocab, const Model& model){
 	beams[0][0].state = model.BeginSentenceState(); 
 	for(int i = 0; i < words.size(); i ++){
 
-		std::cerr<<"==============="<<std::endl<<"beam "<<i<<std::endl;
+/*		std::cerr<<"==============="<<std::endl<<"beam "<<i<<std::endl;
 		for(int j = 0; j < beams[i].size(); ++j){
 			for(int k = 0; k < beams[i][j].path.size(); ++k){
 				std::cout<<words[beams[i][j].path[k]]<<" ";
 			}
 			std::cout<<beams[i][j].score<<std::endl;
 		}
-		for(int j = 0; j < beams[i].size(); ++j){
+*/		for(int j = 0; j < beams[i].size(); ++j){
 			for(int k = 0; k < words.size(); k ++){
 				if(beams[i][j].check(k)) continue;
 				StateItem newstateitem;

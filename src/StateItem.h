@@ -22,6 +22,15 @@ public:
 			score = 0.0;
 			path.clear();
 	};
+	StateItem(const StateItem& stateitem){
+			score = stateitem.score;
+			state = stateitem.state;
+			path = stateitem.path;
+			bits[0] = stateitem.bits[0];
+			bits[1] = stateitem.bits[1];
+			bits[2] = stateitem.bits[2];
+			bits[3] = stateitem.bits[3];
+	};
 	~StateItem(){};
 	
 	void copy(const StateItem& stateitem){
@@ -58,10 +67,10 @@ public:
 		stateitem.score += ret.prob;
 		unsigned long anchor = 1;
 		stateitem.path.push_back(index);
-		if(index < 64) stateitem.bits[0] &= (anchor << index);
-		else if(index < 128) stateitem.bits[1] &= (anchor << (index - 64));
-		else if(index < 192) stateitem.bits[2] &= (anchor << (index - 128));
-		else if(index < 256) stateitem.bits[3] &= (anchor << (index - 192));
+		if(index < 64) stateitem.bits[0] |= (anchor << index);
+		else if(index < 128) stateitem.bits[1] |= (anchor << (index - 64));
+		else if(index < 192) stateitem.bits[2] |= (anchor << (index - 128));
+		else if(index < 256) stateitem.bits[3] |= (anchor << (index - 192));
 		else {
 			std::cerr<<"out of the range"<<std::endl;
 			            exit(1);

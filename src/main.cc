@@ -6,11 +6,11 @@
 using namespace std;
 using namespace lm;
 
-int main() {
-	Model model("file.arpa");
+int main(int argc, char** argv) {
+	Model model(argv[1]);
 	const Vocabulary &vocab = model.GetVocabulary();
 
-	ifstream ifs("test");
+	ifstream ifs(argv[2]);
 	string line;
 	while(getline(ifs,line)){
 		Process proc(line);
