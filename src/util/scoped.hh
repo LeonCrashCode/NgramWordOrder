@@ -27,6 +27,12 @@ template <class T, class Closer> class scoped_base {
 
     ~scoped_base() { Closer::Close(p_); }
 
+#if __cplusplus >= 201103L
+    scoped_base(scoped_base &&from) noexcept : p_(from.p_) {
+      from.p_ = nullptr;
+    }
+#endif
+
     void reset(T *p = NULL) {
       scoped_base other(p_);
       p_ = p;
@@ -47,9 +53,15 @@ template <class T, class Closer> class scoped_base {
   protected:
     T *p_;
 
+#if __cplusplus >= 201103L
+  public:
+    scoped_base(const scoped_base &) = delete;
+    scoped_base &operator=(const scoped_base &) = delete;
+#else
   private:
     scoped_base(const scoped_base &);
     scoped_base &operator=(const scoped_base &);
+#endif
 };
 
 template <class T, class Closer> class scoped : public scoped_base<T, Closer> {
@@ -78,6 +90,8 @@ template <class T, void (*clean)(T*)> class scoped_c : public scoped<T, scoped_c
 class scoped_malloc : public scoped_c<void, std::free> {
   public:
     explicit scoped_malloc(void *p = NULL) : scoped_c<void, std::free>(p) {}
+
+    explicit scoped_malloc(std::size_t size) : scoped_c<void, std::free>(MallocOrThrow(size)) {}
 
     void call_realloc(std::size_t to);
 };

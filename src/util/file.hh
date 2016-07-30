@@ -20,6 +20,12 @@ class scoped_fd {
 
     ~scoped_fd();
 
+#if __cplusplus >= 201103L
+    scoped_fd(scoped_fd &&from) noexcept : fd_(from.fd_) {
+      from.fd_ = -1;
+    }
+#endif
+
     void reset(int to = -1) {
       scoped_fd other(fd_);
       fd_ = to;
@@ -132,10 +138,10 @@ void ErsatzPWrite(int fd, const void *data_void, std::size_t size, uint64_t off)
 
 void FSyncOrThrow(int fd);
 
-// Seeking
-void SeekOrThrow(int fd, uint64_t off);
-void AdvanceOrThrow(int fd, int64_t off);
-void SeekEnd(int fd);
+// Seeking: returns offset
+uint64_t SeekOrThrow(int fd, uint64_t off);
+uint64_t AdvanceOrThrow(int fd, int64_t off);
+uint64_t SeekEnd(int fd);
 
 std::FILE *FDOpenOrThrow(scoped_fd &file);
 std::FILE *FDOpenReadOrThrow(scoped_fd &file);

@@ -3,6 +3,7 @@
 #include "lm/model.hh"
 #include "lm/ngram_query.hh"
 #include <iostream>
+#include <map>
 
 using namespace std;
 using namespace lm::ngram;
@@ -10,38 +11,50 @@ using namespace lm::ngram;
 class StateItem{
 public:
 	double score;
-	unsigned long bits[4];
+	map<string, int> bow;
+	//unsigned long bits[4];
 	State state;
-	vector<int> path;
+	vector<string> path;
 public:
-	StateItem(){
-			bits[0] = (unsigned long)0;
+	StateItem(const map<string,int>& _bow){
+	/*		bits[0] = (unsigned long)0;
 			bits[1] = (unsigned long)0;
 			bits[2] = (unsigned long)0;
 			bits[3] = (unsigned long)0;
-			score = 0.0;
+	*/		score = 0.0;
 			path.clear();
+			bow = _bow;
 	};
 	StateItem(const StateItem& stateitem){
 			score = stateitem.score;
 			state = stateitem.state;
 			path = stateitem.path;
-			bits[0] = stateitem.bits[0];
+			bow = stateitem.bow;
+	/*		bits[0] = stateitem.bits[0];
 			bits[1] = stateitem.bits[1];
 			bits[2] = stateitem.bits[2];
-			bits[3] = stateitem.bits[3];
+			bits[3] = stateitem.bits[3];*/
 	};
 	~StateItem(){};
 	
 	void copy(const StateItem& stateitem){
-		bits[0] = stateitem.bits[0];
+	/*	bits[0] = stateitem.bits[0];
 		bits[1] = stateitem.bits[1];
 		bits[2] = stateitem.bits[2];
-		bits[3] = stateitem.bits[3];
+		bits[3] = stateitem.bits[3];*/
 		score = stateitem.score;
 		path = stateitem.path;
+		bow = stateitem.bow;
 	}
-	bool check(const int& index){
+	void generate(vector<string>& actions){
+		map<string,int>::iterator iter = bow.begin();
+		for(;iter != bow.end(); iter++){
+			if(iter->second > 0){
+				actions.push_back(iter->first);
+			}
+		}
+	}
+	/*bool check(const int& index){
 		unsigned long anchor = 1;
 		if(index < 64){
 			return ( (anchor << index) & bits[0] );
@@ -61,20 +74,25 @@ public:
 			return false;
 		}
 
-	}
-	void transit(StateItem& stateitem, const Vocabulary& vocab, const Model& model, const string& word, const int& index){
-			lm::FullScoreReturn ret = model.FullScore(state, vocab.Index(word), stateitem.state);
-		stateitem.score += ret.prob;
-		unsigned long anchor = 1;
-		stateitem.path.push_back(index);
-		if(index < 64) stateitem.bits[0] |= (anchor << index);
+	}*/
+	void transit(StateItem& stateitem, const Vocabulary& vocab, const Model& model, const string& word){
+//		lm::FullScoreReturn ret = model.FullScoreReturn(state, vocab.Index(word), stateitem.state);
+//		stateitem.score += ret.prob;
+		
+		double ret = (double)model.Score(state, vocab.Index(word), stateitem.state);
+                stateitem.score += ret;
+//		unsigned long anchor = 1;
+		stateitem.path.push_back(word);
+		stateitem.bow[word] -= 1;
+		
+	/*	if(index < 64) stateitem.bits[0] |= (anchor << index);
 		else if(index < 128) stateitem.bits[1] |= (anchor << (index - 64));
 		else if(index < 192) stateitem.bits[2] |= (anchor << (index - 128));
 		else if(index < 256) stateitem.bits[3] |= (anchor << (index - 192));
 		else {
 			std::cerr<<"out of the range"<<std::endl;
 			            exit(1);
-		}
+		}*/
 	}
 };
 

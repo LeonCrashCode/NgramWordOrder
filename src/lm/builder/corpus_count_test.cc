@@ -33,6 +33,7 @@ BOOST_AUTO_TEST_CASE(Short) {
   // little more loin </s> bar </s> </s>
 
   util::WriteOrThrow(input_file.get(), input, sizeof(input) - 1);
+  util::SeekOrThrow(input_file.get(), 0);
   util::FilePiece input_piece(input_file.release(), "temp file");
 
   util::stream::ChainConfig config;
@@ -46,7 +47,7 @@ BOOST_AUTO_TEST_CASE(Short) {
   uint64_t token_count;
   WordIndex type_count = 10;
   std::vector<bool> prune_words;
-  CorpusCount counter(input_piece, vocab.get(), token_count, type_count, prune_words, "", chain.BlockSize() / chain.EntrySize(), SILENT);
+  CorpusCount counter(input_piece, vocab.get(), true, token_count, type_count, prune_words, "", chain.BlockSize() / chain.EntrySize(), SILENT);
   chain >> boost::ref(counter);
   NGramStream<BuildingPayload> stream(chain.Add());
   chain >> util::stream::kRecycle;
